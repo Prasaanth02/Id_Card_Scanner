@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI ID Card Scanner</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Phosphor Icons for premium UI icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+</head>
+<body>
+    <div id="toast-container"></div>
+    
+    <div class="main-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <i class="ph-fill ph-identification-badge"></i>
+                <h1>IntelliScan AI</h1>
+            </div>
+            <p class="subtitle">Advanced ID Card OCR & Data Extraction</p>
+        </header>
+
+        <!-- Main Content Grid -->
+        <main class="content-grid">
+            
+            <!-- Left Column: Input Methods -->
+            <div class="input-section glass-card">
+                <h2>Upload ID Card</h2>
+                
+                <!-- Tab Navigation -->
+                <div class="tabs">
+                    <button class="tab active" data-target="upload-tab"><i class="ph ph-upload-simple"></i> Upload Image</button>
+                    <button class="tab" data-target="webcam-tab"><i class="ph ph-camera"></i> Use Webcam</button>
+                </div>
+
+                <!-- Upload Tab -->
+                <div id="upload-tab" class="tab-content active">
+                    <div class="drop-zone" id="drop-zone">
+                        <i class="ph ph-image drop-icon"></i>
+                        <p>Drag & Drop your ID card here</p>
+                        <span class="or-divider">or</span>
+                        <input type="file" id="file-input" accept="image/*" class="hidden">
+                        <button class="btn btn-primary" onclick="document.getElementById('file-input').click()">
+                            Browse Files
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Webcam Tab -->
+                <div id="webcam-tab" class="tab-content">
+                    <div class="webcam-container">
+                        <video id="videoElement" autoplay playsinline></video>
+                        <div class="webcam-overlay">Align ID Card perfectly</div>
+                    </div>
+                    <div class="webcam-controls">
+                        <button id="start-camera" class="btn btn-secondary"><i class="ph ph-video-camera"></i> Start Camera</button>
+                        <button id="capture-image" class="btn btn-primary" disabled><i class="ph ph-aperture"></i> Capture & Scan</button>
+                    </div>
+                    <canvas id="canvasElement" class="hidden"></canvas>
+                </div>
+            </div>
+
+            <!-- Right Column: Loading or Results -->
+            <div class="results-section glass-card" id="results-container">
+                
+                <!-- Initial State -->
+                <div id="initial-state" class="center-content">
+                    <div class="empty-state-icon">
+                        <i class="ph ph-scan text-muted"></i>
+                    </div>
+                    <h3>Waiting for Image</h3>
+                    <p class="text-muted">Upload an ID card to see AI extraction results here.</p>
+                </div>
+
+                <!-- Loading State -->
+                <div id="loading-state" class="center-content hidden">
+                    <div class="spinner"></div>
+                    <h3>Processing Image...</h3>
+                    <p class="text-muted" id="loading-text">Enhancing and extracting text (EasyOCR)</p>
+                </div>
+
+                <!-- Results State -->
+                <div id="data-state" class="hidden fade-in">
+                    <div class="results-header">
+                        <h2>Extraction Results</h2>
+                        <button id="download-btn" class="btn btn-outline-sm">
+                            <i class="ph ph-download-simple"></i> JSON
+                        </button>
+                    </div>
+
+                    <div class="preview-container">
+                        <img id="scanned-image-preview" src="" alt="Cropped ID Card" />
+                        <span id="crop-badge" class="badge badge-info">Auto-Cropped</span>
+                    </div>
+
+                    <div class="extracted-fields list-group" id="fields-list">
+                        <!-- Fields populated via JS -->
+                    </div>
+
+                    <div class="raw-data-accordion">
+                        <button class="accordion-btn" id="toggle-raw">
+                            <span><i class="ph ph-code"></i> View Raw OCR Text</span>
+                            <i class="ph ph-caret-down" id="raw-caret"></i>
+                        </button>
+                        <div class="accordion-content" id="raw-text-content">
+                            <textarea id="raw-text-area" readonly></textarea>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Background decoration -->
+    <div class="bg-shape shape-1"></div>
+    <div class="bg-shape shape-2"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>
