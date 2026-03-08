@@ -6,3 +6,4 @@ easyocr==1.7.0
 numpy
 Pillow
 python-dotenv
+jinja2

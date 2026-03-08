@@ -1,4 +1,4 @@
-const API_URL = 'http://127.0.0.1:8000';
+const API_URL = '';
 
 // DOM Elements
 const dropZone = document.getElementById('drop-zone');
@@ -37,11 +37,11 @@ tabs.forEach(tab => {
         // Remove active class from all
         tabs.forEach(t => t.classList.remove('active'));
         tabContents.forEach(c => c.classList.remove('active'));
-        
+
         // Add active to clicked
         tab.classList.add('active');
         document.getElementById(tab.dataset.target).classList.add('active');
-        
+
         // If switching away from webcam, stop it
         if (tab.dataset.target !== 'webcam-tab') {
             stopCamera();
@@ -78,14 +78,61 @@ function handleFile(file) {
         showToast('Please upload a valid image file.', 'error');
         return;
     }
-    processImage(file);
+    // Resize client-side before uploading to reduce transfer time & server load
+    resizeImage(file, 1500).then(resizedFile => {
+        processImage(resizedFile);
+    }).catch(() => {
+        // Fallback: send original if resize fails
+        processImage(file);
+    });
+}
+
+/**
+ * Resizes an image file client-side if it exceeds maxDim on either axis.
+ * Returns a compressed JPEG File object via canvas.
+ */
+function resizeImage(file, maxDim) {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        const url = URL.createObjectURL(file);
+        img.onload = () => {
+            URL.revokeObjectURL(url);
+            const { width, height } = img;
+
+            // Skip resizing if already small enough
+            if (width <= maxDim && height <= maxDim) {
+                resolve(file);
+                return;
+            }
+
+            const scale = maxDim / Math.max(width, height);
+            const newW = Math.round(width * scale);
+            const newH = Math.round(height * scale);
+
+            const canvas = document.createElement('canvas');
+            canvas.width = newW;
+            canvas.height = newH;
+            canvas.getContext('2d').drawImage(img, 0, 0, newW, newH);
+
+            canvas.toBlob(
+                (blob) => {
+                    if (!blob) { reject(); return; }
+                    resolve(new File([blob], file.name, { type: 'image/jpeg' }));
+                },
+                'image/jpeg',
+                0.85
+            );
+        };
+        img.onerror = reject;
+        img.src = url;
+    });
 }
 
 // --- Webcam Logic ---
 startCameraBtn.addEventListener('click', async () => {
     try {
-        stream = await navigator.mediaDevices.getUserMedia({ 
-            video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } } 
+        stream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } }
         });
         videoElement.srcObject = stream;
         startCameraBtn.style.display = 'none';
@@ -99,12 +146,12 @@ startCameraBtn.addEventListener('click', async () => {
 
 captureBtn.addEventListener('click', () => {
     if (!stream) return;
-    
+
     // Draw current video frame to canvas
     canvasElement.width = videoElement.videoWidth;
     canvasElement.height = videoElement.videoHeight;
     canvasElement.getContext('2d').drawImage(videoElement, 0, 0);
-    
+
     // Convert canvas to blob
     canvasElement.toBlob((blob) => {
         const file = new File([blob], "webcam-capture.jpg", { type: "image/jpeg" });
@@ -149,7 +196,7 @@ async function processImage(file) {
         currentExtractedData = data;
         displayResults(data);
         showToast('Extraction successful!', 'success');
-        
+
     } catch (error) {
         console.error('API Error:', error);
         showToast(error.message, 'error');
@@ -165,21 +212,21 @@ function displayResults(data) {
     // Hide loading, show data
     loadingState.classList.add('hidden');
     dataState.classList.remove('hidden');
-    
+
     // Image Preview
     scannedImagePreview.src = data.preview_image_base64;
     cropBadge.style.display = data.was_cropped ? 'block' : 'none';
-    
+
     // Raw Text
     rawTextArea.value = data.raw_text || "No text detected.";
-    
+
     // Build Fields List
     fieldsList.innerHTML = '';
-    
+
     const fieldConfigs = [
         { key: 'name', label: 'Full Name' },
         { key: 'roll_number', label: 'ID / Roll Number' },
-        { key: 'date_of_birth', label: 'Date of Birth' },
+        { key: 'validity', label: 'Validity' },
         { key: 'department', label: 'Department / Course' },
         { key: 'institution', label: 'Institution' }
     ];
@@ -187,7 +234,7 @@ function displayResults(data) {
     fieldConfigs.forEach(config => {
         const val = data[config.key];
         const conf = data.confidence_scores[config.key] || 0;
-        
+
         if (val) {
             let confClass = 'conf-low';
             let confText = 'Low Confidence';
@@ -198,7 +245,7 @@ function displayResults(data) {
                 <div class="list-item">
                     <div class="item-header">
                         <span>${config.label}</span>
-                        <span class="conf-badge ${confClass}" title="Score: ${(conf*100).toFixed(0)}%">
+                        <span class="conf-badge ${confClass}" title="Score: ${(conf * 100).toFixed(0)}%">
                             <i class="ph-fill ph-check-circle"></i> ${confText}
                         </span>
                     </div>
@@ -227,11 +274,11 @@ toggleRawBtn.addEventListener('click', () => {
 // --- Download ---
 downloadBtn.addEventListener('click', () => {
     if (!currentExtractedData) return;
-    
+
     // Clean up base64 from download
     const toDownload = { ...currentExtractedData };
     delete toDownload.preview_image_base64;
-    
+
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(toDownload, null, 2));
     const dt = new Date().toISOString().replace(/:/g, '-').split('.')[0];
     const el = document.createElement('a');
@@ -247,7 +294,7 @@ function showToast(message, type = 'info') {
     const container = document.getElementById('toast-container');
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
-    
+
     let icon = 'ph-info';
     if (type === 'success') icon = 'ph-check-circle';
     if (type === 'error') icon = 'ph-warning-circle';

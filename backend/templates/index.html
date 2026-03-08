@@ -1,17 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI ID Card Scanner</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="/static/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- Phosphor Icons for premium UI icons -->
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
 </head>
+
 <body>
     <div id="toast-container"></div>
-    
+
     <div class="main-container">
         <!-- Header -->
         <header class="header">
@@ -24,14 +26,15 @@
 
         <!-- Main Content Grid -->
         <main class="content-grid">
-            
+
             <!-- Left Column: Input Methods -->
             <div class="input-section glass-card">
                 <h2>Upload ID Card</h2>
-                
+
                 <!-- Tab Navigation -->
                 <div class="tabs">
-                    <button class="tab active" data-target="upload-tab"><i class="ph ph-upload-simple"></i> Upload Image</button>
+                    <button class="tab active" data-target="upload-tab"><i class="ph ph-upload-simple"></i> Upload
+                        Image</button>
                     <button class="tab" data-target="webcam-tab"><i class="ph ph-camera"></i> Use Webcam</button>
                 </div>
 
@@ -55,8 +58,10 @@
                         <div class="webcam-overlay">Align ID Card perfectly</div>
                     </div>
                     <div class="webcam-controls">
-                        <button id="start-camera" class="btn btn-secondary"><i class="ph ph-video-camera"></i> Start Camera</button>
-                        <button id="capture-image" class="btn btn-primary" disabled><i class="ph ph-aperture"></i> Capture & Scan</button>
+                        <button id="start-camera" class="btn btn-secondary"><i class="ph ph-video-camera"></i> Start
+                            Camera</button>
+                        <button id="capture-image" class="btn btn-primary" disabled><i class="ph ph-aperture"></i>
+                            Capture & Scan</button>
                     </div>
                     <canvas id="canvasElement" class="hidden"></canvas>
                 </div>
@@ -64,7 +69,7 @@
 
             <!-- Right Column: Loading or Results -->
             <div class="results-section glass-card" id="results-container">
-                
+
                 <!-- Initial State -->
                 <div id="initial-state" class="center-content">
                     <div class="empty-state-icon">
@@ -118,6 +123,7 @@
     <div class="bg-shape shape-1"></div>
     <div class="bg-shape shape-2"></div>
 
-    <script src="app.js"></script>
+    <script src="/static/app.js"></script>
 </body>
+
 </html>
